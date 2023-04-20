@@ -35,6 +35,10 @@ async function _fetch(path: string, body: object): Promise<any> {
     } catch (_) {}
 
     if (req.status >= 400) {
+        if (req.status === 401) {
+            throw new Error("invalid or expired chat token");
+        }
+
         let hme = res as HMError;
         if (hme.ok === false && typeof hme.msg === "string") {
             throw new Error(hme.msg);

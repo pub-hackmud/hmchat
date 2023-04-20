@@ -1,4 +1,4 @@
-import { Channel, Chat as ApiChat, ObjectID, Username, accountData, chats as getChats, getToken } from "./api";
+import { Channel, Chat as ApiChat, ObjectID, Username, accountData, chats as getChats, getToken, createChat, CreateChatRequest } from "./api";
 
 export type HMChatConfig = {
     pollFrequency: number;
@@ -12,10 +12,21 @@ export type Chat = Omit<ApiChat, "t"> & {
     t: Date;
 };
 
+export type SendChat = {
+    from: string;
+    msg: string;
+} & ({
+    to: string;
+    channel: undefined;
+} | {
+    to: undefined;
+    channel: string;
+});
+
 export enum HMChatStatus {
     UNAUTHED = "unauthed",
     RUNNING = "running",
-    PAUSED = "paused",
+    STOPPED = "stopped",
     ERRORED = "errored",
 }
 
@@ -43,9 +54,10 @@ export default class HMChat {
         chats: new Set(),
         accountData: new Set(),
     };
+    #preaddedUsers: Set<Username> = new Set()
 
     get users() {
-        return [...this.accountData.keys()];
+        return [...this.accountData.keys(), ...this.#preaddedUsers.values()];
     }
 
     get channels() {
@@ -62,7 +74,7 @@ export default class HMChat {
     constructor(config: Partial<HMChatConfig>) {
         this.config = Object.assign({
             pollFrequency: 2 * 1000,
-            accountFrequency: 5 * 60 * 1000,
+            accountFrequency: 10 * 60 * 1000,
         }, config);
     }
 
@@ -99,12 +111,32 @@ export default class HMChat {
         this.#loop();
     }
 
-    pause() {
-        this.status = HMChatStatus.PAUSED;
+    stop() {
+        this.status = HMChatStatus.STOPPED;
         this.#emit("stopped", []);
         if (this.#loopTimer !== undefined) {
             clearTimeout(this.#loopTimer);
             this.#loopTimer = undefined;
+        }
+    }
+
+    async send(chat: SendChat) {
+        await createChat({
+            chat_token: this.token ?? "",
+            username: chat.from,
+            msg: chat.msg,
+            ...(chat.channel !== undefined ? {
+                channel: chat.channel,
+            } : {}),
+            ...(chat.to !== undefined ? {
+                tell: chat.to,
+            } : {}),
+        } as CreateChatRequest);
+    }
+
+    preaddUsers(...users: Username[]) {
+        for (let user of users) {
+            this.#preaddedUsers.add(user);
         }
     }
 
@@ -126,6 +158,7 @@ export default class HMChat {
                 channels.set(channel, new Set(_users));
             }
 
+            this.#preaddedUsers.delete(user);
             ad.set(user, channels);
         }
         
