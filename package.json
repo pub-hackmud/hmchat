@@ -1,0 +1,21 @@
+{
+  "name": "hmchat",
+  "version": "1.0.0",
+  "description": "next-gen hackmud chat library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "hackmud"
+  ],
+  "author": "mogery",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
