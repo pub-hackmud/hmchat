@@ -3,9 +3,9 @@ Next-gen hackmud chat library.
 
 ## Usage example
 ```js
-import HMChat from "hmchat";
+import HMChat from "@pub-hackmud/hmchat";
 // or with require:
-// const HMChat = require("hmchat").default;
+// const HMChat = require("@pub-hackmud/hmchat").default;
 
 const hm = new HMChat();
 
