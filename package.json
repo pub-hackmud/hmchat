@@ -1,10 +1,11 @@
 {
   "name": "hmchat",
   "version": "1.0.0",
-  "description": "next-gen hackmud chat library",
+  "description": "Next-gen hackmud chat library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc"
   },
   "keywords": [
